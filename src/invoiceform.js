@@ -6,7 +6,7 @@ import { Card, CardContent } from "./components/ui/card";
 
 
 
-export default function InvoiceForm({ invoice, setInvoice, togglePreview, showPreview, onSend }) {
+export default function InvoiceForm({ invoice, setInvoice, togglePreview, showPreview, onSend, onSaveDraft }) {
   const [feedback, setFeedback] = useState("");
 
   // Validation
@@ -42,6 +42,7 @@ export default function InvoiceForm({ invoice, setInvoice, togglePreview, showPr
   };
 
   const handleSaveDraft = () => {
+    if (onSaveDraft) onSaveDraft();
     setFeedback("Invoice saved as draft!");
   };
 

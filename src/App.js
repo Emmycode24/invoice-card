@@ -1,11 +1,15 @@
 
 
 import { useState } from "react";
+
 import Sidebar from "./sidebar";
 import InvoiceForm from "./invoiceform";
 import InvoicePreview from "./invoicepreview";
+import DraftsPage from "./drafts";
+
 
 function App() {
+  const [page, setPage] = useState("invoice"); // 'invoice' or 'drafts'
   const [showPreview, setShowPreview] = useState(false);
   const [invoice, setInvoice] = useState({
     firstName: "",
@@ -24,8 +28,7 @@ function App() {
     taxRate: 0.1,
     discount: 0,
   });
-
-  // Previewed invoice state
+  const [drafts, setDrafts] = useState([]);
   const [previewInvoice, setPreviewInvoice] = useState(null);
 
   const subtotal = previewInvoice ? previewInvoice.items.reduce((acc, item) => acc + item.qty * item.cost, 0) : 0;
@@ -38,25 +41,53 @@ function App() {
     setShowPreview(true);
   };
 
+  // Save as draft
+  const handleSaveDraft = () => {
+    setDrafts([...drafts, { ...invoice }]);
+  };
+
+  // Edit draft
+  const handleSelectDraft = (draft) => {
+    setInvoice(draft);
+    setPage("invoice");
+  };
+
+  // Delete draft
+  const handleDeleteDraft = (idx) => {
+    setDrafts(drafts.filter((_, i) => i !== idx));
+  };
+
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar />
+      <Sidebar onNavigate={setPage} />
       <main className="flex-1 p-6 grid grid-cols-1 gap-6 relative">
-        <InvoiceForm
-          invoice={invoice}
-          setInvoice={setInvoice}
-          togglePreview={() => setShowPreview(!showPreview)}
-          showPreview={showPreview}
-          onSend={handleSendAndPreview}
-        />
-        {showPreview && previewInvoice && (
-          <InvoicePreview
-            invoice={previewInvoice}
-            subtotal={subtotal}
-            tax={tax}
-            total={total}
-            showPreview={showPreview}
-            togglePreview={() => setShowPreview(false)}
+        {page === "invoice" && (
+          <>
+            <InvoiceForm
+              invoice={invoice}
+              setInvoice={setInvoice}
+              togglePreview={() => setShowPreview(!showPreview)}
+              showPreview={showPreview}
+              onSend={handleSendAndPreview}
+              onSaveDraft={handleSaveDraft}
+            />
+            {showPreview && previewInvoice && (
+              <InvoicePreview
+                invoice={previewInvoice}
+                subtotal={subtotal}
+                tax={tax}
+                total={total}
+                showPreview={showPreview}
+                togglePreview={() => setShowPreview(false)}
+              />
+            )}
+          </>
+        )}
+        {page === "drafts" && (
+          <DraftsPage
+            drafts={drafts}
+            onSelectDraft={handleSelectDraft}
+            onDeleteDraft={handleDeleteDraft}
           />
         )}
       </main>
